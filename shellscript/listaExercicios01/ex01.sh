@@ -7,6 +7,8 @@ else
     echo "$1 é Impar"
 fi
 
+#pedindo valores
+echo "pressione ENTER para rodar a versão que solicita dados"
 read dummy
 
 read -p "Digite um número para verificar se ele é par ou ímpar" valor
