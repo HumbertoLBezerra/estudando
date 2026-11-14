@@ -7,18 +7,26 @@ clear
 printf "Digite 1 para Soma (+)\nDigite 2 para Subitração (-)\nDigite 3 para Multiplicação (*)\nDigite 4 para Divisão (/)\n"
 read -p "" opcao
 
+#Trocar , por . caso digitar errado
+valor1="${valor1//,/.}"
+valor2="${valor2//,/.}"
+
 case $opcao in
     1)
-    awk 'BEGIN { printf "%.2f\n, $valor1 + $valor2}'
+    printf "%s+%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1+valor2 }'
     ;;
     2)
-    echo "$valor1 - $valor2 Resultado: $(($valor1-$valor2))"
+    printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1-valor2 }'
     ;;
     3)
-    echo "$valor1 * $valor2 Resultado: $(($valor1*$valor2))"
+    printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1*valor2 }'
     ;;
     4)
-    echo "scale = 2; $valor1 / $valor2 Resultado: $(($valor1/$valor2))"
+    if ((valor2 == 0)); then
+        echo "Divisão por 0! Inválida!"
+    else
+        printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1/valor2}'
+    fi
     ;;
     *)
     echo "operação inválida!"
