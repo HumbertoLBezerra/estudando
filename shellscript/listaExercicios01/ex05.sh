@@ -11,23 +11,28 @@ read -p "" opcao
 valor1="${valor1//,/.}"
 valor2="${valor2//,/.}"
 
-case $opcao in
+case "$opcao" in
     1)
-    printf "%s+%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1+valor2 }'
+    printf "%s+%s=" "$valor1" "$valor2"
+    awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1+valor2 }'
     ;;
     2)
-    printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1-valor2 }'
+    printf "%s-%s=" "$valor1" "$valor2"
+    awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1-valor2 }'
     ;;
     3)
-    printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1*valor2 }'
+    printf "%s*%s=" "$valor1" "$valor2"
+    awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1*valor2 }'
     ;;
     4)
     if ((valor2 == 0)); then
         echo "Divisão por 0! Inválida!"
     else
-        printf "%s-%s=" "$valor1" "$valor2"; awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1/valor2}'
+        printf "%s/%s=" "$valor1" "$valor2"
+        awk -v valor1="$valor1" -v valor2="$valor2" 'BEGIN { printf "%.2f\n", valor1/valor2}'
     fi
     ;;
     *)
-    echo "operação inválida!"
+    echo "operação inválida!" >&2
+    ;;
 esac
