@@ -1,9 +1,9 @@
 #!/bin/bash
 #Leia uma idade e classifique: menor de 18, adulto ou idoso (60+).
 
-if (($1 > 59)); then
+if (($1 >= 60)); then
     echo "Idoso!"
-elif (($1 > 18)); then
+elif (($1 >= 18)); then
     echo "Adulto!"
 else
     echo "Menor de 18!"
