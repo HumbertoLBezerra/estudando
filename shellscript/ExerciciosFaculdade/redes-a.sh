@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+#redes-a.sh
+#
 #a) Receber 2 números como entrada, e informar a relação entre eles (maior, menor ou igual).
 
 #Trocar, por . caso digitar errado
@@ -19,8 +22,8 @@ fi
 
 #Recebendo entrada pelo read
 
-read -p "Insira um valor qualquer: " valor1
-read -p "Insira novamente um valor qualquer: " valor2
+read -r -p "Insira um valor qualquer: " valor1
+read -r -p "Insira novamente um valor qualquer: " valor2
 
 #Trocar, por . caso digitar errado
 valor1="${valor1//,/.}"

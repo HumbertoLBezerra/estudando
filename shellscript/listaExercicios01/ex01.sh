@@ -9,9 +9,9 @@ fi
 
 #pedindo valores
 echo "pressione ENTER para rodar a versão que solicita dados"
-read dummy
+read -r dummy
 
-read -p "Digite um número para verificar se ele é par ou ímpar: " valor
+read -r -p "Digite um número para verificar se ele é par ou ímpar: " valor
 
 if [ $((valor%2)) -eq 0 ]; then
     echo "$valor é Par"

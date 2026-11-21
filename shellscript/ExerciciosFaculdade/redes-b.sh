@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+#redes-b.sh
+#
 #b) Receber como argumento um número inteiro, e exibir a mensagem “par”, "ímpar". 
 
 if [[ $1 =~ ^[0-9]+?$ ]]; then

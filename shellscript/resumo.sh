@@ -652,211 +652,7 @@ echo "hoje é $(date)" #Mais comum e normal
 # >> 9.6 LAÇOS ANINHADOS, CONTADOR E ACUMULADOR
 #   - Laço dentro de laço e soma acumulada: [sh e bash]
 #-----------------------------------------------------------
-#for i in 1 2 3; do for j in 1 2 3; do echo "$i x $j = $((i * j))"; done; done#!/bin/sh
-#Comentários são feitos com # e os blocos onde existem comandos que podem ser descomentados para teste estão entre linhas de [-]
-
-# ==============================================================================
-# 0. DIFERENÇA ENTRE #!/bin/sh E #!/bin/bash
-# ==============================================================================
-# A primeira linha (shebang) define qual interpretador executa o script.
-#   - #!/bin/sh   -> Shell padrão POSIX: mais simples, leve e portátil. Em alguns sistemas (ex: Debian/Ubuntu) é o 'dash', que não tem recursos extras do bash (ex: read -p, read -n, [[ ]], arrays).
-#   - #!/bin/bash -> Bash: tudo do sh + recursos extras. Mais prático, porém menos portátil (pode não existir em sistemas minimalistas).
-# Dica: use /bin/sh se precisa rodar em qualquer lugar; use /bin/bash se precisa dos recursos extras.
-
-
-# ==============================================================================
-# 1. COMANDOS BÁSICOS
-# ==============================================================================
-
-#[clear] - Comando que limpa a tela
-
-#[echo "Hello, World!"] - Escreve na tela o que está depois dele.
-
-
-# ==============================================================================
-# 2. VARIÁVEIS
-# ==============================================================================
-
-#AS variáveis no shell são definidas pelo simbolo [$] com o nome dela logo após. Sendo assim sua estrutura é: [$var]  Ex: [$exemplo], [$teste], [$etc]
-#Os valores atribuídos às variáveis são todos tratados como strings e o shell armazena os valores como sequências de caracteres. Para forçá-lo a identificar algo com valor numérico, precisamos usar comandos que o forcem a interpretar aquilo da forma correta. Ex: ((a+b)). O '(())' o força a tratar o que estiver dentro dos parênteses duplos como números inteiros.
-
-
-# ==============================================================================
-# 3. PARÂMETROS POSICIONAIS
-# ==============================================================================
-
-#No shellscript, os parâmetros passados são capturados de forma automática por variáveis especiais (parâmetros posicionais), sendo elas $1, $2, $3, etc. Cada número corresponde à ordem em que o parâmetro foi inserido no terminal. A partir do 10, usamos {}. Ex: ${10}
-#[S#] informa a quantidade total dos parâmetros passados
-#[$@] ou [$*] Representam todos os parâmetros passados de uma só vez.
-
-#-----------------------------------------------------------
-#echo "Olá, vamos testar uma passagem de parâmetros agora!"
-#echo "Os 3 parâmetros inseridos nesse script vão aparecer na próxima linha:"
-#echo "\$1= $1 | \$2= $2 | \$3= $3"
-#-----------------------------------------------------------
-
-
-# ==============================================================================
-# 4. ASPAS
-# ==============================================================================
-
-#As aspas possuem diferenças. Quando usamos apenas as [''] aspas simples, tudo dentro do texto é passado de forma literal, nada é interpretado.
-#Quando usamos as [""] aspas duplas, elas mantêm os espaços intactos, protegem contra erros e leem o valor das variáveis.
-#Quando usamos as [``] crases, o shell olha para o comando inserido dentro delas, o executa em segundo plano e então joga o seu resultado onde as crases estavam (é recomendado usar [$()] ao invez das crases.). Ex:
-
-#-----------------------------------------------------------
-echo "Hoje é `date`" #Forma mais antiga.
-echo "hoje é $(date)" #Mais comum e normal
-# linha acima vai escrever a data atual, dia, hora e fuso.
-#-----------------------------------------------------------
-
-
-# ==============================================================================
-# 5. PONTO E VÍRGULA [;]
-# ==============================================================================
-
-#O uso de [;] dentro do shellscript serve como um separador de comandos, que permite a execução de múltiplas instruções em uma mesma linha de forma sequencial.
-#Ex: [mkdir teste; cd teste; touch teste.txt] vai criar o diretório, depois vai entrar nele e criar um arquivo de texto.
-
-#Também é usado como estrutura de controle em uma linha, como para escrever blocos if, for e while de forma compacta, sem quebras de linha, e para encerramento de blocos [case:], onde é usado o [;;] duplo.
-
-
-#!/bin/bash
-
-# ==============================================================================
-# 6. COMANDO PRINTF (Saída de Dados Formatada)
-# ==============================================================================
-# O 'printf' exibe textos e variáveis na tela com controle total de formatação. Diferente do 'echo', ele é 100% padronizado em qualquer sistema Linux/Unix.
-#
-# CARACTERÍSTICAS PRINCIPAIS:
-#   - NÃO pula linha automaticamente no final (você deve usar \n).
-#   - Separa o "molde do texto" (entre aspas) dos "valores" (variáveis no final).
-#   - Se você usar aspas simples no molde ('...'), não precisa escapar cifrões ($).
-#
-# PRINCIPAIS MARCADORES (Placeholders):
-#   - %s   -> Substitui por String (texto)
-#   - %d   -> Substitui por Número Inteiro (decimal)
-#   - %.2f -> Substitui por Número Decimal (ex: %.2f limita a 2 casas decimais)
-#   - \n   -> Quebra de linha (Enter)
-#   - \t   -> Tabulação (espaço de Tab)
-#
-# EXEMPLOS PRÁTICOS (descomentar só as linhas de comando entre as linhas de [-] e executar). Todos os exemplos do printf funcionam tanto no sh quanto no bash:
-#
-#   - Básico com texto e número: [sh e bash]
-#-----------------------------------------------------------
-#nome="Ana"; idade=20
-#printf "Nome: %s | Idade: %d anos\n" "$nome" "$idade"
-#-----------------------------------------------------------
-#
-#   - Exibindo cifrão literal sem precisar de barra invertida (\): [sh e bash]
-#-----------------------------------------------------------
-#printf '$1 = %s | $2 = %s\n' "$1" "$2"
-#-----------------------------------------------------------
-#
-#   - Múltiplos valores (devem seguir a ordem exata dos marcadores): [sh e bash]
-#-----------------------------------------------------------
-#item="Arroz"; qtd=2; valor=10.50
-#printf "Produto: %s | Qtd: %d | Preço: R$ %.2f\n" "$item" "$qtd" "$valor"
-#-----------------------------------------------------------
-#   (Nota: se der erro de número no %.2f, seu sistema usa vírgula como decimal (pt_BR): troque valor=10.50 por valor=10,50)
-#
-#   - Repetição automática (1 marcador para vários valores repete o molde): [sh e bash]
-#-----------------------------------------------------------
-#printf "Item: %s\n" "Arroz" "Feijão" "Macarrão"
-#-----------------------------------------------------------
-
-
-# ==============================================================================
-# 7. COMANDO READ (Entrada de Dados e Pausas)
-# ==============================================================================
-# O 'read' pausa a execução do script, lê o que o usuário digita no teclado e armazena o conteúdo dentro de uma ou mais variáveis.
-#
-# PRINCIPAIS OPÇÕES (Exclusivas do #!/bin/bash):
-#   -p "Texto" -> Exibe a mensagem de pergunta na mesma linha antes de ler.
-#   -s         -> Modo silencioso (oculta o que é digitado; ideal para senhas).
-#   -n X       -> Lê exatamente X caracteres e avança sem precisar apertar Enter.
-#   -t X       -> Define um tempo limite (timeout) de X segundos para responder.
-#   -r         -> Modo bruto (impede que barras invertidas '\' quebrem o texto).
-#
-# EXEMPLOS PRÁTICOS (descomentar só as linhas de comando entre as linhas de [-] e executar). Cada exemplo indica se funciona só no bash ou também no sh:
-#
-#   - Leitura simples com pergunta na mesma linha: [SÓ bash]
-#-----------------------------------------------------------
-#read -p "Digite seu nome: " usuario
-#printf "Olá, %s!\n" "$usuario"
-#-----------------------------------------------------------
-#{
-#   - Leitura de senha (oculta caracteres na tela): [SÓ bash]
-#-----------------------------------------------------------
-#read -s -p "Digite sua senha: " senha
-#echo ""   # Necessário para pular linha após o usuário dar Enter
-#printf "Senha recebida com %d caracteres\n" "${#senha}"
-#-----------------------------------------------------------
-#
-#   - Múltiplos valores na mesma pergunta (separados por espaço): [SÓ bash]
-#-----------------------------------------------------------
-#read -p "Digite nome, idade e cidade: " nome idade cidade
-#printf "Nome: %s | Idade: %s | Cidade: %s\n" "$nome" "$idade" "$cidade"
-#-----------------------------------------------------------
-#   (Nota: se digitar mais palavras que variáveis, a última absorve o resto).
-#
-#   - Pausa estilo "Pressione qualquer tecla para continuar": [SÓ bash]
-#-----------------------------------------------------------
-#read -n 1 -s -r -p "Pressione qualquer tecla para continuar..."
-#echo ""
-#-----------------------------------------------------------
-#
-#   - Compatibilidade com #!/bin/sh puro (onde -p e -n não existem): [sh e bash]
-#-----------------------------------------------------------
-#printf "Digite seu nome: "; read usuario
-#printf "Pressione ENTER para continuar..."; read dummy
-#printf "Olá, %s!\n" "$usuario"
-#-----------------------------------------------------------
-
-#================================================================================
-#8.ESTRUTURAS CONDICIONAIS (if, elif, else e case)
-#================================================================================
-#
-# o if no shellscript funciona verificando se o comando seguinte a ele executou corretamente e não com uma condição como nas outras linguagens de programação
-#ele apenas age assim quando usamos a condição dentro do [ ], basicamente o if executa o comando "test" no comando seguinte a ele e sua ação depende do resultado dele
-#if [condição]; then
-#	echo '...'
-#
-#elif [condição]; then
-#   echo '...'
-#
-#else
-#   echo '...'
-#fi
-#
-#-----------------------------------------------------------------
-##!/bin/bash
-#read -p "Digite uma opção (iniciar/parar/status): " opcao
-#
-#case "$opcao" in
-#    iniciar)
-#        ;;#
-#        echo "Iniciando..."
-#        ;;
-#    parar|encerrar)
-#        echo "Parando..."
-#        ;;
-#    status)
-#        echo "Tudo certo"
-#        ;;
-#    *)
-#        echo "Opção inválida"
-#esac
-#-------------------------------------------------------------------
-#case "$1" in
-#    [0-9]*) echo "Começa com número" ;;
-#    [a-zA-Z]*) echo "Começa com letra" ;;
-#    *) echo "Outro" ;;
-#esac
-#-------------------------------------------------------------------
-
-
-
+#for i in 1 2 3; do for j in 1 2 3; do echo "$i x $j = $((i * j))"; done; done
 #soma=0
 #for n in $(seq 1 10); do soma=$((soma + n)); done
 #echo "Soma de 1 a 10: $soma"
@@ -1216,3 +1012,906 @@ echo "hoje é $(date)" #Mais comum e normal
 #ls --help | head -n 3
 #type echo ls cd
 #-----------------------------------------------------------
+# ==============================================================================
+# 20. ARITMÉTICA E NÚMEROS DECIMAIS
+# ==============================================================================
+# O shell só calcula com INTEIROS. Para decimais é preciso chamar outro programa: awk (o mais prático e já instalado), bc (clássico, pode não estar instalado: [sudo pacman -S bc]) ou printf (só formata, não calcula).
+# Qual usar? Para quase tudo, awk.
+
+
+# >> 20.1 ARITMÉTICA INTEIRA
+#   $(( ))  devolve o VALOR da conta (para usar em outro comando)   |   (( ))  (bash) só calcula e devolve código de saída (seção 8.0)
+#   Operadores: + - * / % (resto) e ** (potência, SÓ bash). Dentro do $(( )) as variáveis dispensam o [$]: [$((a + b))].
+#   A divisão DESCARTA a parte decimal: [$((10/3))] dá 3, e [$((-7/2))] dá -3 (arredonda para zero).
+#   Número começando com 0 é lido como OCTAL: [$((010))] dá 8 e [$((08))] dá erro. Para forçar decimal use [$((10#08))] (bash).
+#   Outras bases (bash): [$((16#ff))] dá 255 | [$((2#101))] dá 5.
+#   Dividir por zero dá erro ("division by 0"): teste o divisor antes.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#a=17; b=5
+#echo "soma: $((a + b)) | subtração: $((a - b)) | multiplicação: $((a * b))"
+#echo "divisão: $((a / b)) | resto: $((a % b))"
+#[ "$b" -ne 0 ] && echo "divisão segura: $((a / b))"
+#-----------------------------------------------------------
+#
+#   - Potência e bases: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#echo "2 elevado a 10: $((2 ** 10)) | hex ff: $((16#ff)) | 08 decimal: $((10#08))"
+#-----------------------------------------------------------
+
+
+# >> 20.2 DECIMAIS COM AWK (a opção mais comum)
+#   awk 'BEGIN { ... }'  roda o código sem precisar de arquivo de entrada. Divide em decimal e usa printf para escolher as casas: [%.2f].
+#   Operadores: + - * / % ^ (potência). Funções: [sqrt(x)] raiz | [int(x)] corta a parte decimal | [exp] [log] [sin] [cos].
+#   Passe variáveis do shell com [-v nome="$valor"]. Nunca coloque [$var] dentro das aspas simples do awk.
+#   O gawk (awk padrão do Arch) lê e escreve decimais SEMPRE com ponto, mesmo no pt_BR.
+#   Dividir por zero no awk também dá erro: teste antes.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#awk 'BEGIN { printf "%.2f\n", 10/3 }'
+#awk 'BEGIN { printf "media: %.2f\n", (7.5 + 8 + 6.25) / 3 }'
+#awk 'BEGIN { printf "raiz de 2: %.4f | 2^10: %d\n", sqrt(2), 2^10 }'
+#a=5.5; b=2
+#awk -v a="$a" -v b="$b" 'BEGIN { printf "%.2f x %.2f = %.2f\n", a, b, a * b }'
+#resultado=$(awk -v a="$a" -v b="$b" 'BEGIN { printf "%.2f", a / b }')
+#echo "guardado na variável: $resultado"
+#-----------------------------------------------------------
+#
+#   - Somar uma coluna de números (muito usado em pipes): [sh e bash]
+#-----------------------------------------------------------
+#printf "2.5\n3.5\n4\n" | awk '{ soma += $1 } END { printf "soma: %.2f\n", soma }'
+#-----------------------------------------------------------
+
+
+# >> 20.3 DECIMAIS COM BC (se estiver instalado)
+#   [echo "conta" | bc]: o bc lê a conta pelo stdin. [scale=N] define as casas decimais (vale principalmente para divisão; o padrão é 0, ou seja, divide como inteiro).
+#   [bc -l] carrega a biblioteca matemática: scale=20 e funções [s(x)] seno, [c(x)] cosseno, [l(x)] logaritmo, [e(x)] exponencial. [sqrt(x)] funciona até sem -l.
+#   Operadores: + - * / % ^. O bc NÃO coloca o zero antes do ponto: 1/2 sai como [.50].
+#   Verifique se existe com [command -v bc].
+#
+#   - Exemplo: [sh e bash | precisa do bc instalado]
+#-----------------------------------------------------------
+#command -v bc > /dev/null || { echo "bc não instalado (sudo pacman -S bc)"; exit 1; }
+#echo "scale=2; 10/3" | bc
+#echo "scale=2; 5.5 * 2" | bc
+#echo "scale=4; sqrt(2)" | bc
+#echo "scale=2; 1/2" | bc
+#-----------------------------------------------------------
+
+
+# >> 20.4 PRINTF PARA FORMATAR DECIMAIS
+#   O printf NÃO calcula, só formata um número que você já tem: [%.2f] 2 casas | [%8.2f] 8 colunas com 2 casas | [%.0f] sem casas (arredonda) | [%e] notação científica.
+#   No pt_BR o printf do bash espera VÍRGULA na entrada ([printf "%.2f" 3,14]) e dá erro com ponto. Para forçar o ponto: [LC_NUMERIC=C printf ...].
+#   Os valores vindos do awk podem ser formatados no próprio awk.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#LC_NUMERIC=C printf "%.2f | %8.2f | %.0f\n" 3.14159 3.14159 3.7
+#-----------------------------------------------------------
+
+
+# >> 20.5 ARREDONDAR E TRUNCAR
+#   Truncar (cortar): [int(x)] no awk.
+#   Arredondar para N casas: [printf "%.Nf"] (no awk ou no shell). Atenção: o valor exatamente na metade tende ao par (2.5 vira 2 e 3.5 vira 4).
+#   Arredondar para cima (a partir de .5, números positivos): [int(x + 0.5)].
+#   Teto (sempre para cima) e piso: [int()] serve de piso para positivos; para teto some 0.999999 ou compare o resultado com o original.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#awk 'BEGIN { x = 3.7; printf "truncado: %d | arredondado: %.0f | +0.5: %d\n", int(x), x, int(x + 0.5) }'
+#awk 'BEGIN { x = 2.5; printf "2.5 -> %.0f | com int(x+0.5): %d\n", x, int(x + 0.5) }'
+#-----------------------------------------------------------
+
+
+# >> 20.6 COMPARAR DECIMAIS
+#   [ ] e (( )) só comparam inteiros: [ 3.5 -gt 2 ] dá "integer expression expected" (código de saída 2, seção 8.0).
+#   Use o awk e leia o resultado pelo código de saída: [exit !(condição)] sai com 0 (verdadeiro para o if) quando a condição vale.
+#   Com o bc: [echo "3.5 > 2.1" | bc] imprime 1 (verdadeiro) ou 0 (falso).
+#   Igualdade exata de decimais é traiçoeira (0.1 + 0.2 não é igual a 0.3 no computador). Compare a diferença com uma tolerância: [(a - b) < 0.0001 && (b - a) < 0.0001].
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#a=3.5; b=2.1
+#if awk -v a="$a" -v b="$b" 'BEGIN { exit !(a > b) }'; then echo "$a é maior que $b"; else echo "$a não é maior que $b"; fi
+#awk 'BEGIN { print (0.1 + 0.2 == 0.3) ? "igual" : "diferente (erro de ponto flutuante)" }'
+#-----------------------------------------------------------
+#
+#   - Com bc: [sh e bash | precisa do bc]
+#-----------------------------------------------------------
+#[ "$(echo "3.5 > 2.1" | bc)" -eq 1 ] && echo "bc: 3.5 é maior que 2.1"
+#-----------------------------------------------------------
+
+
+# >> 20.7 LER DECIMAIS DO USUÁRIO
+#   1. Troque a vírgula por ponto: [valor=${valor//,/.}] (a barra dupla troca TODAS as ocorrências).
+#   2. Valide antes de calcular. No bash: [[ "$v" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]. No sh: [case] com padrão (aceita só dígitos e ponto, não barra "1.2.3").
+#
+#   - Calculadora de duas operandos: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#read -p "Primeiro número: " a
+#read -p "Segundo número: " b
+#a=${a//,/.}; b=${b//,/.}
+#if [[ ! "$a" =~ ^-?[0-9]+(\.[0-9]+)?$ || ! "$b" =~ ^-?[0-9]+(\.[0-9]+)?$ ]]; then echo "Digite apenas números" >&2; exit 1; fi
+#awk -v a="$a" -v b="$b" 'BEGIN {
+#    printf "Soma: %.2f\n", a + b
+#    printf "Subtração: %.2f\n", a - b
+#    printf "Multiplicação: %.2f\n", a * b
+#    if (b == 0) print "Divisão: impossível (divisor zero)"
+#    else printf "Divisão: %.2f\n", a / b
+#}'
+#-----------------------------------------------------------
+#
+#   - Validação em sh puro: [sh e bash]
+#-----------------------------------------------------------
+#v="3.5"
+#case "$v" in ''|*[!0-9.]*) echo "inválido" ;; *) echo "parece um número: $v" ;; esac
+#v="abc"
+#case "$v" in ''|*[!0-9.]*) echo "inválido" ;; *) echo "parece um número: $v" ;; esac
+#-----------------------------------------------------------
+
+
+# >> 20.8 ATALHO: FUNÇÃO CALC
+#   Uma função (seção 10) que recebe a conta como texto e imprime o resultado com 2 casas. Use SÓ com contas escritas por você: o texto é executado pelo awk, então nunca passe entrada do usuário direto.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#calc() { awk "BEGIN { printf \"%.2f\n\", $* }"; }
+#calc "10/3"
+#calc "(7.5 + 8) / 2"
+#-----------------------------------------------------------
+
+
+# >> 20.9 ERROS COMUNS COM NÚMEROS
+#   - Esperar decimal de [$(( ))]: [$((10/3))] dá 3 e [$((3.5 + 1))] dá erro de sintaxe. Use awk.
+#   - Usar [-gt] [-eq] com decimal: dá "integer expression expected". Use awk ou bc (20.6).
+#   - Digitar vírgula: [3,5] não é número para o awk nem para o bc. Troque por ponto (20.7).
+#   - Zero à esquerda: [08] e [09] viram erro de octal no $(( )). Use [10#08] (bash) ou remova o zero.
+#   - Colocar [$var] dentro das aspas simples do awk: ele não expande. Use [-v var="$valor"].
+#   - Usar [%d] no printf com decimal: dá erro. Use [%.2f] (e [LC_NUMERIC=C] se o sistema estiver em pt_BR).
+#   - Comparar decimais com [==]: use tolerância (20.6).
+#   - Esquecer que o bc pode não estar instalado: [command -v bc] antes de usar.
+
+
+# ==============================================================================
+# 21. ARQUIVOS, PERMISSÕES E COMPACTAÇÃO
+# ==============================================================================
+# >> 21.1 COMO LER O ls -l
+#   -rwxr-xr-- 1 ana devs 2048 nov 13 10:00 script.sh
+#   - 1º caractere: tipo ([-] arquivo comum, [d] diretório, [l] link simbólico). Depois vêm 3 grupos de 3 letras: DONO (u), GRUPO (g) e OUTROS (o), cada um com r (ler), w (escrever) e x (executar). Depois: nº de links, dono, grupo, tamanho em bytes, data e nome.
+#   - Em PASTAS o significado muda: r = listar o conteúdo | w = criar e apagar arquivos dentro dela | x = entrar (cd) e acessar os itens.
+#
+# >> 21.2 CHMOD, CHOWN E UMASK
+#   Números (octal): r=4, w=2, x=1, e você SOMA por grupo. rwx=7, rw-=6, r-x=5, r--=4.
+#     chmod 755 arq   -> dono rwx, grupo r-x, outros r-x (típico de scripts)
+#     chmod 644 arq   -> dono rw-, grupo r--, outros r-- (típico de arquivos de texto)
+#     chmod 600 arq   -> só o dono lê e escreve (senhas, tokens, chaves)
+#     chmod 700 pasta -> só o dono acessa
+#   Letras: [chmod u+x arq] dá execução ao dono | [g-w] tira escrita do grupo | [o=] zera os outros | [a+r] todos podem ler | [-R] recursivo (pastas inteiras).
+#   [chown usuario:grupo arq] troca dono e grupo (precisa de root) | [chgrp grupo arq] só o grupo.
+#   umask: define o que NÃO será dado a arquivos novos. O sistema parte de 666 (arquivos) e 777 (pastas) e tira a máscara: com [umask 022] arquivos novos ficam 644 e pastas 755. Com [umask 077] tudo novo fica privado.
+#   Permissões especiais: SUID (4000, o programa roda como o DONO do arquivo), SGID (2000) e sticky bit (1000, em pastas como /tmp só o dono apaga o próprio arquivo: [chmod 1777]). Arquivos com SUID são alvo de auditoria: [find / -perm -4000 -type f 2>/dev/null].
+#
+#   - Exemplo (GNU/Linux): [sh e bash]
+#-----------------------------------------------------------
+#touch arq.sh
+#chmod 755 arq.sh; ls -l arq.sh | cut -c1-10
+#chmod 600 arq.sh; ls -l arq.sh | cut -c1-10
+#chmod u+x,g+r arq.sh; ls -l arq.sh | cut -c1-10
+#stat -c "octal=%a simbólico=%A dono=%U" arq.sh
+#(umask 077; touch privado.txt); ls -l privado.txt | cut -c1-10
+#mkdir pasta; ls -ld pasta | cut -c1-10
+#rm -r arq.sh privado.txt pasta
+#-----------------------------------------------------------
+#
+# >> 21.3 COMANDOS DE ARQUIVO
+#   cp origem destino | cp -r (pasta) | cp -a (cópia fiel: recursiva, preserva permissões, datas e links) | -i pergunta antes de sobrescrever | -n nunca sobrescreve
+#   mv origem destino (move OU renomeia) | -i | -n   |   rm arq | rm -r pasta | rm -f (sem perguntar) | rm -i (pergunta). NÃO existe lixeira: apagou, perdeu.
+#   mkdir -p a/b/c (cria a cadeia toda, sem erro se já existir) | touch arq (cria vazio ou atualiza a data) | ls -lah (ocultos e tamanhos legíveis) | ls -lt (por data)
+#   stat arq (detalhes) | file arq (tipo REAL do conteúdo) | du -sh pasta (tamanho total) | realpath arq (caminho absoluto) | readlink -f
+#
+# >> 21.4 CHAVES, [--] E PROTEÇÃO DO RM
+#   - Expansão de chaves (bash): [mkdir -p projeto/{src,docs,tests}] | [cp arq{,.bak}] copia arq para arq.bak | [{01..05}] com zeros | [{1..10..2}] com passo. O sh (dash) NÃO expande chaves.
+#   - Nomes que começam com [-] viram OPÇÕES: [rm -arquivo] falha. Use [--] para dizer "acabaram as opções": [rm -- "$arq"], [grep -- "$padrao" arq]. Ou use [./-arquivo].
+#   - Perigo clássico: [rm -rf "$dir"/*] com $dir vazio vira [rm -rf /*]. Proteja com [${dir:?}] (aborta se vazia) ou [set -u]: [rm -rf "${dir:?}"/*]. Confira também se o caminho NÃO é "/" nem "$HOME" antes de apagar.
+#
+#   - Chaves: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#mkdir -p projeto/{src,docs,tests}; ls projeto
+#touch config.txt; cp config.txt{,.bak}; ls config.txt*
+#echo arquivo-{a,b,c}.txt {01..03}
+#rm -r projeto config.txt config.txt.bak
+#-----------------------------------------------------------
+#
+#   - O [--] e a proteção com ${var:?}: [sh e bash]
+#-----------------------------------------------------------
+#touch ./-teste.txt
+#rm -teste.txt 2>&1 | head -n 1
+#rm -- -teste.txt && echo "removido com --"
+#dir=""
+#( echo "${dir:?variável vazia}" ) 2>&1 | head -n 1
+#-----------------------------------------------------------
+#
+# >> 21.5 LINKS
+#   - Link simbólico ([ln -s alvo nome]): um atalho que aponta para o CAMINHO. Se o original for apagado, o link quebra. É a base dos deploys com versões ([atual -> v3]). Troca atômica: [ln -sfn novo_alvo atual] (o [-n] evita criar o link DENTRO da pasta para onde ele já aponta).
+#   - Hard link ([ln alvo nome]): outro NOME para o mesmo conteúdo (mesmo inode). Apagar um nome não apaga o conteúdo enquanto houver outro. Não funciona entre discos diferentes nem com pastas.
+#
+#   - Exemplo (versões e rollback): [sh e bash]
+#-----------------------------------------------------------
+#mkdir v1 v2; echo "versao 1" > v1/app.txt; echo "versao 2" > v2/app.txt
+#ln -sfn v1 atual; cat atual/app.txt; readlink atual
+#ln -sfn v2 atual; cat atual/app.txt; readlink atual
+#rm -r v1 v2 atual
+#-----------------------------------------------------------
+#
+# >> 21.6 COMPACTAR, COPIAR, CONFERIR E COMPARAR
+#   tar: junta vários arquivos em um só. Letras: c (criar) | x (extrair) | t (listar) | v (mostrar) | f ARQUIVO (nome do arquivo, vem por último no grupo de letras) | z (gzip, .tar.gz) | j (bzip2) | J (xz) | -C pasta (entra na pasta antes).
+#     [tar -czf backup.tar.gz pasta/] cria | [tar -tzf backup.tar.gz] lista sem extrair (bom para testar se está íntegro) | [tar -xzf backup.tar.gz -C /destino] extrai em outra pasta
+#   gzip arq (gera arq.gz e REMOVE o original) | gzip -k (mantém) | gunzip arq.gz | zip -r arq.zip pasta | unzip arq.zip
+#   rsync -a origem/ destino/ copia SÓ o que mudou. [-a] modo arquivo (recursivo, preserva permissões e datas) | [-v] verboso | [-n] simulação | [--delete] apaga no destino o que não existe mais na origem (CUIDADO) | [-z] comprime | [rsync -a origem/ usuario@host:/destino/] via SSH. A barra no final de [origem/] copia o CONTEÚDO; sem ela copia a pasta inteira.
+#   sha256sum arq (impressão digital do conteúdo) | [sha256sum -c arq.sha256] confere | usado para provar que um backup ou download não foi corrompido.
+#   diff a b (mostra diferenças; código 0 = iguais, 1 = diferentes) | diff -r pasta1 pasta2 | cmp a b (byte a byte) | comm a b (compara listas ORDENADAS)
+#
+#   - Backup, conferência e restauração: [sh e bash]
+#-----------------------------------------------------------
+#mkdir dados; echo "a" > dados/1.txt; echo "b" > dados/2.txt
+#tar -czf backup.tar.gz dados
+#tar -tzf backup.tar.gz
+#sha256sum backup.tar.gz > backup.sha256; sha256sum -c backup.sha256
+#mkdir restaurado; tar -xzf backup.tar.gz -C restaurado
+#diff -r dados restaurado/dados && echo "restauração idêntica ao original"
+#echo "alterado" >> dados/1.txt; diff -r dados restaurado/dados > /dev/null; echo "código do diff quando há diferença: $?"
+#if command -v rsync > /dev/null; then mkdir copia; rsync -an dados/ copia/; rmdir copia; else echo "(rsync não instalado)"; fi
+#rm -r dados restaurado backup.tar.gz backup.sha256
+#-----------------------------------------------------------
+
+
+# ==============================================================================
+# 22. USUÁRIOS, SERVIÇOS, PACOTES E MONITORAMENTO
+# ==============================================================================
+# ATENÇÃO: criar usuários, mexer em serviços e instalar pacotes muda o sistema. Pratique em uma máquina virtual ou container, nunca direto na máquina que você usa.
+#
+# >> 22.1 USUÁRIOS E GRUPOS
+#   id (uid, gid e grupos de quem roda) | id -u (só o uid; 0 = root) | whoami | groups [usuario] | who / w (quem está logado) | last (histórico de logins)
+#   /etc/passwd: um usuário por linha, 7 campos separados por [:] -> nome:x:UID:GID:comentário:home:shell. O [x] indica que a senha está em /etc/shadow (só o root lê). UID 0 = root, 1 a 999 = contas de sistema, 1000 ou mais = usuários comuns (na maioria das distros). /etc/group: grupo:x:GID:membros.
+#   Administração (precisa de root):
+#     useradd -m -s /bin/bash -G grupo1,grupo2 nome   cria o usuário com pasta pessoal, shell e grupos extras
+#     passwd nome   define a senha   |   chage -d 0 nome   força trocar a senha no próximo login
+#     usermod -aG grupo nome   ADICIONA a um grupo (sem o [-a] SUBSTITUI todos os grupos!)   |   usermod -L nome   bloqueia a conta
+#     userdel -r nome   apaga o usuário E a pasta pessoal   |   groupadd grupo   |   gpasswd -d nome grupo   remove do grupo
+#   sudo executa um comando como root (ou outro usuário). A configuração fica em /etc/sudoers e deve ser editada SEMPRE com [visudo], que confere a sintaxe. [sudo -l] lista o que você pode fazer. Em scripts nunca coloque senha: use NOPASSWD só onde for realmente necessário e restrito a um comando.
+#
+#   - Consultas (só leitura): [sh e bash]
+#-----------------------------------------------------------
+#id; id -u; whoami
+#echo "primeiros usuários (nome, uid, shell):"; cut -d: -f1,3,7 /etc/passwd | head -n 3
+#echo "usuários comuns (UID >= 1000):"; awk -F: '$3 >= 1000 && $3 < 65534 {print $1}' /etc/passwd
+#id root > /dev/null 2>&1 && echo "root existe"
+#id naoexiste > /dev/null 2>&1 || echo "naoexiste não existe (é assim que se testa em scripts)"
+#-----------------------------------------------------------
+#
+# >> 22.2 SERVIÇOS (systemd)
+#   systemctl status nome | start | stop | restart | reload (recarrega a configuração sem parar) | enable (inicia no boot) | disable | is-active nome (imprime active/inactive e devolve 0 se ativo, ótimo no if) | is-enabled | list-units --type=service --state=failed (serviços com falha) | daemon-reload (depois de editar um arquivo .service)
+#   start, stop e enable precisam de root. Os arquivos de serviço ficam em /etc/systemd/system/nome.service.
+#   journalctl -u nome (logs do serviço) | -n 50 (últimas 50) | -f (acompanha) | --since "1 hour ago" | -p err (só erros) | -b (desde o boot atual) | -t etiqueta (mensagens do [logger -t etiqueta])
+#   Timer do systemd: alternativa moderna ao cron. Dois arquivos em /etc/systemd/system/: [meuscript.service] com [ExecStart=/caminho/script.sh] e [meuscript.timer] com [OnCalendar=*-*-* 02:00:00]. Ative com [systemctl enable --now meuscript.timer] e veja com [systemctl list-timers].
+#   Sem systemd (containers, Alpine): [service nome status] ou [pgrep nome].
+#
+#   - Exemplo (se o systemctl existir): [sh e bash]
+#-----------------------------------------------------------
+#if command -v systemctl > /dev/null; then systemctl is-active --quiet ssh && echo "ssh ativo" || echo "ssh parado ou inexistente"; else echo "systemctl não existe aqui"; fi
+#-----------------------------------------------------------
+#
+# >> 22.3 PACOTES
+#   Arch (o seu caso): [pacman -Syu] atualiza tudo | [pacman -S pacote] instala | [pacman -Rns pacote] remove com dependências órfãs | [pacman -Ss termo] busca | [pacman -Qi pacote] info | [pacman -Q] lista os instalados | [pacman -Qo /caminho] qual pacote tem esse arquivo
+#   Debian/Ubuntu: [apt update && apt install -y pacote] | [apt remove] | [apt search] | [dpkg -l] | [dpkg -S /caminho]
+#   Fedora/RHEL: [dnf install -y pacote] | [dnf remove] | [dnf search] | [rpm -qa] | [rpm -qf /caminho]
+#   Detectar a distribuição em script: [. /etc/os-release; echo "$ID"] (arch, debian, ubuntu, fedora...) ou [command -v pacman].
+#   Idempotência (rodar duas vezes não quebra nada): [pacman -Qi pacote > /dev/null 2>&1 || sudo pacman -S --noconfirm pacote]. Em scripts use as opções não interativas ([--noconfirm] no pacman, [-y] no apt e no dnf).
+#
+#   - Exemplo (só leitura): [sh e bash]
+#-----------------------------------------------------------
+#. /etc/os-release; echo "distribuição: $ID ($NAME)"
+#if command -v pacman > /dev/null; then gerenciador=pacman; elif command -v apt > /dev/null; then gerenciador=apt; elif command -v dnf > /dev/null; then gerenciador=dnf; else gerenciador="desconhecido"; fi
+#echo "gerenciador de pacotes: $gerenciador"
+#-----------------------------------------------------------
+#
+# >> 22.4 MONITORAMENTO
+#   df -h (espaço por partição) | df -h / | df -i (inodes) | du -sh pasta | du -h --max-depth=1 /var | sort -h (subpastas, da menor para a maior) | lsblk (discos) | findmnt
+#   free -h (memória; a coluna "available" é a que realmente sobra) | uptime (carga média de 1, 5 e 15 min: compare com o número de CPUs, [nproc]) | vmstat 1 5 | top / htop (interativos) | ps aux (todos os processos) | ps -eo pid,comm,%cpu,%mem --sort=-%mem | head (os que mais usam memória)
+#   /proc é um sistema de arquivos virtual do kernel: /proc/cpuinfo, /proc/meminfo, /proc/loadavg, /proc/uptime.
+#   Extrair números para usar em if: [uso=$(df / --output=pcent | tail -n 1 | tr -dc '0-9')] (% do /) | [mem=$(free | awk '/^Mem:/ {printf "%d", $3/$2*100}')] (% de memória) | [cut -d' ' -f1 /proc/loadavg] (carga de 1 min)
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#uso=$(df / --output=pcent | tail -n 1 | tr -dc '0-9'); echo "uso do / : $uso%"
+#mem=$(free | awk '/^Mem:/ {printf "%d", $3/$2*100}'); echo "memória usada: $mem%"
+#echo "carga média (1 min): $(cut -d' ' -f1 /proc/loadavg) | CPUs: $(nproc)"
+#if [ "$uso" -gt 80 ]; then echo "ALERTA: disco acima de 80%"; else echo "disco ok"; fi
+#ps -eo pid,comm --sort=-%mem | head -n 3
+#-----------------------------------------------------------
+
+
+# ==============================================================================
+# 23. REDES: TEORIA E CÁLCULOS
+# ==============================================================================
+# >> 23.1 CONCEITOS
+#   - Modelo TCP/IP (4 camadas): Acesso à rede (Ethernet e Wi-Fi, endereço MAC) -> Internet (IP e ICMP: endereços e rotas) -> Transporte (TCP e UDP: portas) -> Aplicação (HTTP, DNS, SSH...). O modelo OSI detalha em 7 camadas: física, enlace, rede, transporte, sessão, apresentação e aplicação.
+#   - IPv4: 32 bits em 4 octetos (0 a 255), como 192.168.0.10. A MÁSCARA diz quais bits identificam a REDE. O prefixo CIDR conta esses bits: /24 = 24 bits de rede = máscara 255.255.255.0.
+#   - Endereço de rede = IP AND máscara | Broadcast = rede OR (NOT máscara) | Hosts úteis = 2^(32 - prefixo) - 2 (tira o endereço de rede e o de broadcast).
+#   - Faixas privadas (RFC 1918): 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16. Loopback (a própria máquina): 127.0.0.0/8. Link-local (sem DHCP): 169.254.0.0/16.
+#   - Gateway = o roteador, a saída para outras redes | DNS = traduz nomes em IPs (porta 53) | DHCP = entrega IP, máscara, gateway e DNS automaticamente (UDP 67 e 68) | ARP = descobre o MAC de um IP na rede local | ICMP = mensagens de controle (ping, traceroute).
+#   - TCP: com conexão, confiável e ordenado (HTTP, SSH, e-mail). UDP: sem conexão, rápido e sem garantia de entrega (DNS, VoIP, jogos).
+#   - Portas conhecidas: 20/21 FTP | 22 SSH | 23 Telnet (inseguro) | 25 SMTP | 53 DNS | 67/68 DHCP | 80 HTTP | 110 POP3 | 123 NTP | 143 IMAP | 443 HTTPS | 445 SMB | 3306 MySQL | 3389 RDP | 5432 PostgreSQL. Portas abaixo de 1024 são "privilegiadas" (abrir uma exige root).
+#
+# >> 23.2 OPERAÇÕES COM BITS NO SHELL (base do cálculo de sub-redes)
+#   Dentro do [$(( ))] (sh e bash): [&] AND | [|] OR | [^] XOR | [~] NOT | [<<] desloca bits para a esquerda | [>>] para a direita. O shell usa 64 bits, então use [& 0xFFFFFFFF] para ficar em 32.
+#   Converter bases: [$((2#1010))] = 10 (bash) | [$((16#ff))] = 255 (bash) | [printf "%x" 255] = ff | [printf "%o" 8] = 10 | binário com o bc: [echo "obase=2; 10" | bc].
+#   IP -> número: a*2^24 + b*2^16 + c*2^8 + d, ou [(a<<24) + (b<<16) + (c<<8) + d]. Número -> IP: pegue cada octeto com [(n>>24) & 255], [(n>>16) & 255], [(n>>8) & 255] e [n & 255].
+#   Máscara de um prefixo: [(0xFFFFFFFF << (32 - prefixo)) & 0xFFFFFFFF].
+#
+#   - Calculadora de sub-rede (só aritmética, não usa a rede): [sh e bash]
+#-----------------------------------------------------------
+#ip2int() { local IFS=.; set -- $1; echo $(( ($1 << 24) + ($2 << 16) + ($3 << 8) + $4 )); }
+#int2ip() { echo "$(( ($1 >> 24) & 255 )).$(( ($1 >> 16) & 255 )).$(( ($1 >> 8) & 255 )).$(( $1 & 255 ))"; }
+#
+#cidr="192.168.10.77/26"
+#ip=${cidr%/*}; prefixo=${cidr#*/}
+#ipn=$(ip2int "$ip")
+#mascara=$(( (0xFFFFFFFF << (32 - prefixo)) & 0xFFFFFFFF ))
+#rede=$(( ipn & mascara ))
+#broadcast=$(( rede | (~mascara & 0xFFFFFFFF) ))
+#echo "IP:        $ip"
+#echo "Máscara:   $(int2ip $mascara)"
+#echo "Rede:      $(int2ip $rede)/$prefixo"
+#echo "Broadcast: $(int2ip $broadcast)"
+#echo "Hosts:     $(( (1 << (32 - prefixo)) - 2 ))"
+#echo "Faixa de hosts: $(int2ip $((rede + 1))) até $(int2ip $((broadcast - 1)))"
+#-----------------------------------------------------------
+#
+#   - Listar todos os IPs de uma faixa (base de uma varredura, SEM enviar nada pela rede): [sh e bash]
+#-----------------------------------------------------------
+#ip2int() { local IFS=.; set -- $1; echo $(( ($1 << 24) + ($2 << 16) + ($3 << 8) + $4 )); }
+#int2ip() { echo "$(( ($1 >> 24) & 255 )).$(( ($1 >> 16) & 255 )).$(( ($1 >> 8) & 255 )).$(( $1 & 255 ))"; }
+#cidr="10.0.0.8/29"; ip=${cidr%/*}; prefixo=${cidr#*/}
+#mascara=$(( (0xFFFFFFFF << (32 - prefixo)) & 0xFFFFFFFF ))
+#rede=$(( $(ip2int "$ip") & mascara )); broadcast=$(( rede | (~mascara & 0xFFFFFFFF) ))
+#for n in $(seq $((rede + 1)) $((broadcast - 1))); do int2ip "$n"; done
+#-----------------------------------------------------------
+#
+# >> 23.3 DNS, ROTAS E HTTP NA PRÁTICA
+#   ip -br addr (IPs) | ip route (rotas e gateway) | ip neigh (tabela ARP) | cat /etc/resolv.conf (DNS) | resolvectl status (DNS do systemd-resolved) | /etc/hosts (nomes locais, consultado antes do DNS)
+#   dig +short A dominio | dig +short MX dominio | dig -x IP (consulta reversa) | host nome | getent hosts nome (resolve COMO o sistema, incluindo o /etc/hosts)
+#   curl -I URL (só os cabeçalhos) | curl -s -o /dev/null -w "%{http_code} %{time_total}s\n" URL (código e tempo) | curl -fsS --max-time 5 URL | wget -q --spider URL (testa sem baixar)
+#   Diagnóstico em camadas, de baixo para cima: interface ligada ([ip -br link]) -> IP ([ip -br addr]) -> gateway ([ping] no gateway) -> internet por IP ([ping 1.1.1.1]) -> DNS ([getent hosts nome]) -> aplicação ([curl]). Se o ping por IP funciona e por nome não, o problema é o DNS.
+#
+#   - Exemplo (consulta local): [sh e bash]
+#-----------------------------------------------------------
+#getent hosts localhost
+#grep -v '^#' /etc/hosts | head -n 3
+#-----------------------------------------------------------
+#
+# >> 23.4 FIREWALL (conceito e comandos)
+#   Um firewall decide quais pacotes entram, saem ou passam pela máquina. Política recomendada: BLOQUEAR tudo que entra por padrão e liberar só o necessário (SSH, HTTP, HTTPS), aceitando sempre as conexões já estabelecidas.
+#   ufw (simples): [ufw default deny incoming] | [ufw default allow outgoing] | [ufw allow 22/tcp] | [ufw allow from 192.168.0.0/24 to any port 22] | [ufw enable] | [ufw status numbered] | [ufw delete N]
+#   nftables (moderno, substitui o iptables): [nft list ruleset] mostra tudo. Arquivo /etc/nftables.conf mínimo:
+#       table inet filter {
+#         chain input {
+#           type filter hook input priority 0; policy drop;
+#           ct state established,related accept
+#           iif lo accept
+#           tcp dport { 22, 80, 443 } accept
+#         }
+#       }
+#   iptables (clássico): [iptables -L -n -v] lista | [iptables -A INPUT -p tcp --dport 22 -j ACCEPT] libera o SSH | [iptables -P INPUT DROP] política de bloquear.
+#   CUIDADO: aplicar "policy drop" ou [ufw enable] SEM liberar o SSH antes derruba o seu acesso remoto. Teste em uma VM com acesso pelo console e sempre libere [established,related] e a interface [lo].
+#
+# >> 23.5 CAPTURA DE TRÁFEGO
+#   tcpdump -i any -nn -c 20 port 53   captura 20 pacotes de DNS ([-nn] não resolve nomes nem portas, [-c] limita a quantidade, [any] todas as interfaces). Precisa de root.
+#   Filtros: [host 192.168.0.5] | [port 443] | [icmp] | [tcp] | combine com [and], [or], [not].  [-w captura.pcap] grava em arquivo e [-r captura.pcap] lê. O Wireshark abre arquivos .pcap com interface gráfica.
+#   Capturar tráfego de terceiros sem autorização é crime em muitos países: use só na SUA rede ou em laboratório.
+#   ss -tulnp (portas em escuta) | ss -tn state established (conexões ativas) | ss -s (resumo)
+
+
+# ==============================================================================
+# 24. PADRÕES PARA SCRIPTS PROFISSIONAIS
+# ==============================================================================
+# >> 24.1 OPÇÕES LONGAS (--dry-run, --help, --arquivo=x)
+#   O getopts só entende opções curtas ([-n]). Para opções longas use um laço com while, case e shift. [shift 2] consome a opção e o valor; [--arquivo=x] vem em um parâmetro só e o valor sai com [${1#*=}]. O [--] encerra as opções.
+#
+#   - Exemplo: [sh e bash | executar: sh script.sh --dry-run --file=dados.txt destino1 destino2]
+#-----------------------------------------------------------
+#dry_run=0; arquivo=""
+#while [ $# -gt 0 ]; do
+#    case "$1" in
+#        -h|--help) echo "uso: $0 [-n|--dry-run] [-f|--file arquivo | --file=arquivo] destino..."; exit 0 ;;
+#        -n|--dry-run) dry_run=1; shift ;;
+#        -f|--file) [ $# -ge 2 ] || { echo "falta o valor de $1" >&2; exit 2; }; arquivo="$2"; shift 2 ;;
+#        --file=*) arquivo="${1#*=}"; shift ;;
+#        --) shift; break ;;
+#        -*) echo "opção desconhecida: $1" >&2; exit 2 ;;
+#        *) break ;;
+#    esac
+#done
+#echo "dry_run=$dry_run arquivo=$arquivo restante=[$*]"
+#-----------------------------------------------------------
+#
+# >> 24.2 MODO DE SIMULAÇÃO (dry-run) COM UMA FUNÇÃO
+#   Uma função [run] executa o comando de verdade OU só o mostra. Todo comando perigoso passa por ela. Em vez de [rm -rf pasta] escreva [run rm -rf pasta].
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#run() { if [ "$dry_run" = 1 ]; then echo "[dry-run] $*"; else "$@"; fi; }
+#dry_run=1; run rm -rf algo_importante
+#dry_run=0; run echo "executado de verdade"
+#-----------------------------------------------------------
+#
+# >> 24.3 LOG COM DATA E NÍVEIS
+#   Padrão: data e hora, nível (INFO, WARN, ERROR) e mensagem. Mensagens de erro vão para o stderr ([>&2]); [tee -a] mostra na tela E grava no arquivo. O [logger -t nome "mensagem"] envia ao log do sistema (veja com [journalctl -t nome]).
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#LOG_FILE=$(mktemp)
+#log() { nivel=$1; shift; printf '%s [%s] %s\n' "$(date '+%F %T')" "$nivel" "$*" | tee -a "$LOG_FILE"; }
+#log INFO "script iniciado"
+#log WARN "disco quase cheio"
+#log ERROR "falha ao conectar" >&2
+#echo "--- conteúdo do arquivo de log:"; cat "$LOG_FILE"; rm "$LOG_FILE"
+#-----------------------------------------------------------
+#
+# >> 24.4 DATA E HORA (date)
+#   date '+%F' (2026-11-13) | '+%T' (23:59:59) | '+%F %T' | '+%Y%m%d_%H%M%S' (bom para nomes de arquivo) | '+%s' (timestamp Unix: segundos desde 1970) | '+%A' dia da semana | '+%u' dia da semana numérico (1 = segunda) | '+%j' dia do ano
+#   date -d "yesterday" | date -d "7 days ago" '+%F' | date -d "2026-12-25" '+%s' | date -d @1700000000 (timestamp para data). O [-d] é do GNU date (Linux); no macOS/BSD é diferente.
+#   Diferença de datas: converta as duas para timestamp, subtraia e divida por 86400 (segundos em um dia).
+#   [$SECONDS] (bash) conta os segundos desde que o script começou: [inicio=$SECONDS; ...; echo "levou $((SECONDS - inicio))s"]. [time comando] mede o tempo de um comando.
+#
+#   - Exemplo (GNU date): [sh e bash]
+#-----------------------------------------------------------
+#date '+%F | %T | %Y%m%d_%H%M%S | %A | dia da semana: %u'
+#echo "timestamp: $(date +%s)"
+#date -d "yesterday" '+ontem: %F'; date -d "7 days ago" '+7 dias atrás: %F'
+#d=$(( ( $(date -d "2030-01-01" +%s) - $(date +%s) ) / 86400 )); echo "dias até 2030-01-01: $d"
+#date -d @0 -u '+epoch zero: %F %T'
+#-----------------------------------------------------------
+#
+# >> 24.5 CORES NO TERMINAL
+#   Códigos ANSI: [\033[0;31m] vermelho | [\033[0;32m] verde | [\033[0;33m] amarelo | [\033[0;34m] azul | [\033[0;35m] magenta | [\033[0;36m] ciano | [\033[1m] negrito | [\033[0m] RESET (volta ao normal). Use [printf] com o marcador [%b], que interpreta o \033 do argumento. O [tput setaf 1] (vermelho), [tput bold] e [tput sgr0] (reset) fazem o mesmo de forma portátil.
+#   Só use cores se a saída for um terminal: [ -t 1 ] é verdadeiro quando o stdout é um terminal (e não um pipe ou arquivo). Assim o log em arquivo não fica cheio de códigos.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#if [ -t 1 ]; then VERDE='\033[0;32m'; VERMELHO='\033[0;31m'; RESET='\033[0m'; else VERDE=''; VERMELHO=''; RESET=''; fi
+#printf '%b%s%b host1\n' "$VERDE" "ONLINE" "$RESET"
+#printf '%b%s%b host2\n' "$VERMELHO" "OFFLINE" "$RESET"
+#-----------------------------------------------------------
+#
+# >> 24.6 MENUS COM SELECT (bash)
+#   O [select] monta um menu numerado sozinho e repete até um [break]. A variável recebe o TEXTO da opção e o [$REPLY] o que foi digitado. O prompt é a variável [PS3].
+#
+#   - Exemplo: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#PS3="Escolha uma opção: "
+#select opcao in "Mostrar data" "Mostrar usuário" "Sair"; do
+#    case "$opcao" in
+#        "Mostrar data") date ;;
+#        "Mostrar usuário") whoami ;;
+#        "Sair") break ;;
+#        *) echo "opção inválida: $REPLY" ;;
+#    esac
+#done
+#-----------------------------------------------------------
+#
+# >> 24.7 FLOCK (impedir duas execuções ao mesmo tempo)
+#   Se o cron disparar o script de novo antes de a execução anterior acabar, as duas rodam juntas e podem estragar arquivos. O [flock] usa um arquivo de trava: [flock -n arquivo.lock comando] (o [-n] desiste na hora, com código 1, se já estiver travado). A trava é liberada sozinha quando o processo termina, mesmo se der erro.
+#   No cron: [*/5 * * * * flock -n /tmp/monitor.lock /home/user/monitor.sh]   |   Dentro do script (bash): [exec 9>/tmp/meu.lock; flock -n 9 || { echo "já está rodando" >&2; exit 1; }]
+#
+#   - Exemplo (precisa do flock): [sh e bash]
+#-----------------------------------------------------------
+#if command -v flock > /dev/null; then
+#    trava=$(mktemp)
+#    flock -n "$trava" sh -c 'echo "pegou a trava"; flock -n "$0" true || echo "segunda tentativa recusada (já está travado)"' "$trava"
+#    flock -n "$trava" true && echo "depois que a primeira terminou, a trava está livre"
+#    rm -f "$trava"
+#else echo "flock não instalado"; fi
+#-----------------------------------------------------------
+#
+# >> 24.8 PASTA DO SCRIPT E ARQUIVO DE CONFIGURAÇÃO
+#   - Pasta do próprio script (para achar arquivos ao lado dele, mesmo rodando de outro lugar ou pelo cron): [DIR=$(cd "$(dirname "$0")" && pwd)]. No bash, [${BASH_SOURCE[0]}] é mais confiável que o [$0] quando o arquivo é carregado com [source].
+#   - Configuração em arquivo separado: [. "$DIR/config.sh"]. O config.sh só tem [VARIAVEL=valor]. Nunca versione senhas: coloque o config.sh no .gitignore e entregue um [config.exemplo].
+#   - Valores padrão que o usuário pode sobrescrever pelo ambiente: [LIMITE=${LIMITE:-80}] e rode [LIMITE=90 ./script.sh].
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#DIR=$(cd "$(dirname "$0")" && pwd); echo "pasta do script: $DIR"
+#printf 'LIMITE=70\nDESTINO=/tmp/bkp\n' > "$DIR/config.sh"
+#. "$DIR/config.sh"; echo "do config: LIMITE=$LIMITE DESTINO=$DESTINO"
+#rm "$DIR/config.sh"
+#unset LIMITE; LIMITE=${LIMITE:-80}; echo "sem config, valor padrão: $LIMITE"
+#-----------------------------------------------------------
+#
+# >> 24.9 CÓDIGOS DE SAÍDA PADRONIZADOS
+#   0 sucesso | 1 erro geral | 2 uso incorreto (opção ou parâmetro inválido) | 124 o [timeout] estourou | 126 comando encontrado, mas sem permissão de execução | 127 comando não encontrado | 128+N terminado pelo sinal N: 130 = Ctrl+C (sinal 2), 137 = kill -9 (sinal 9), 143 = kill (sinal 15).
+#   Defina códigos próprios e documente-os no [--help]. Ex: 0 ok, 1 erro, 2 uso, 3 dependência faltando, 4 sem permissão.
+#
+#   - Exemplo: [sh e bash]
+#-----------------------------------------------------------
+#sh -c 'exit 3'; echo "exit 3 -> $?"
+#naoexiste_cmd 2>/dev/null; echo "comando inexistente -> $?"
+#touch sem_exec.sh; ./sem_exec.sh 2>/dev/null; echo "sem permissão de execução -> $?"; rm sem_exec.sh
+#sh -c 'kill -9 $$' 2>/dev/null; echo "morto por kill -9 -> $?"
+#-----------------------------------------------------------
+#
+# >> 24.10 MODELO DE SCRIPT PROFISSIONAL (copie e adapte)
+#   Junta tudo: modo estrito, ajuda, opções, log, limpeza com trap, validação de entrada e uma função main.
+#
+#   - Modelo: [SÓ bash | executar: bash script.sh --dry-run /etc/passwd /arquivo_que_nao_existe]
+#-----------------------------------------------------------
+#set -euo pipefail
+#
+#dry_run=0
+#uso() {
+#    cat <<EOF
+#Uso: ${0##*/} [opções] ARQUIVO...
+#  -n, --dry-run   só mostra o que faria
+#  -h, --help      mostra esta ajuda
+#EOF
+#}
+#log() { printf '%s [%s] %s\n' "$(date '+%F %T')" "$1" "$2" >&2; }
+#erro() { log ERROR "$1"; exit "${2:-1}"; }
+#limpar() { [ -z "${tmp:-}" ] || rm -f "$tmp"; }
+#trap limpar EXIT
+#
+#while [ $# -gt 0 ]; do
+#    case "$1" in
+#        -h|--help) uso; exit 0 ;;
+#        -n|--dry-run) dry_run=1; shift ;;
+#        --) shift; break ;;
+#        -*) uso >&2; erro "opção desconhecida: $1" 2 ;;
+#        *) break ;;
+#    esac
+#done
+#[ $# -ge 1 ] || { uso >&2; erro "informe ao menos um arquivo" 2; }
+#
+#main() {
+#    local arq
+#    for arq in "$@"; do
+#        [ -f "$arq" ] || { log WARN "ignorando $arq (não é um arquivo)"; continue; }
+#        if [ "$dry_run" = 1 ]; then log INFO "[dry-run] processaria $arq"; else log INFO "processando $arq"; fi
+#    done
+#}
+#main "$@"
+#-----------------------------------------------------------
+
+
+# ==============================================================================
+# 25. DADOS: AWK AVANÇADO, ARRAYS, CSV, JSON E ALERTAS
+# ==============================================================================
+# >> 25.1 AWK COM ARRAYS (contar e agrupar)
+#   O awk tem arrays associativos (chave e valor). [c[$1]++] conta quantas vezes cada valor da 1ª coluna aparece. Variável que não existe vale 0 (ou vazio), por isso não precisa declarar. [for (k in c) print k, c[k]] percorre o array em ordem NÃO garantida: ordene depois com [sort].
+#   Mais recursos: [/regex/ {...}] só nas linhas que casam | [NR>1] pula o cabeçalho | [$3 >= 400] por condição | [BEGIN {FS=","; OFS=";"}] separadores de entrada e saída | [length($0)] | [substr($1,1,3)] | [split($1, partes, ".")] divide em um array | [tolower()] e [toupper()] | [sprintf("%05d", n)] | [!visto[$0]++] só a 1ª vez que a linha aparece (remove duplicadas mantendo a ordem).
+#   Somar: [s += $2] e dividir no END | máximo: [if ($2 > max) max = $2].
+#
+#   - Contagens em um log de acessos: [sh e bash]
+#-----------------------------------------------------------
+#printf "10.0.0.1 GET /a 200\n10.0.0.2 GET /b 404\n10.0.0.1 GET /c 200\n10.0.0.3 POST /a 500\n10.0.0.1 GET /b 404\n" > acesso.log
+#echo "--- acessos por IP:"; awk '{c[$1]++} END {for (ip in c) print c[ip], ip}' acesso.log | sort -nr
+#echo "--- por código HTTP:"; awk '{s[$4]++} END {for (cod in s) printf "HTTP %s: %d\n", cod, s[cod]}' acesso.log | sort
+#echo "--- taxa de erros:"; awk '$4 >= 400 {erros++} END {printf "%d erros em %d requisições (%.0f%%)\n", erros, NR, erros/NR*100}' acesso.log
+#echo "--- linhas sem repetir a 1ª coluna (mantém a ordem):"; awk '!visto[$1]++ {print $1}' acesso.log
+#rm acesso.log
+#-----------------------------------------------------------
+#
+#   - Falhas de login SSH (o IP é o 4º campo contando do FIM da linha): [sh e bash]
+#-----------------------------------------------------------
+#printf "Failed password for root from 1.2.3.4 port 5555 ssh2\nFailed password for ana from 1.2.3.4 port 5556 ssh2\nAccepted password for bia from 5.6.7.8 port 22 ssh2\nFailed password for root from 9.9.9.9 port 7 ssh2\n" > auth.log
+#grep "Failed password" auth.log | awk '{print $(NF-3)}' | sort | uniq -c | sort -nr
+#grep "Failed password" auth.log | awk '{u[$4]++} END {for (n in u) print u[n], n}' | sort -nr
+#rm auth.log
+#-----------------------------------------------------------
+#
+# >> 25.2 MAPFILE (arquivo para array) E CSV
+#   - [mapfile -t arr < arquivo] (bash 4+, também [readarray]) lê as linhas do arquivo para um array; o [-t] tira a quebra de linha. [mapfile -t arr < <(comando)] lê a saída de um comando. No sh use [while IFS= read -r linha; do ...; done < arquivo].
+#   - CSV simples: [while IFS=, read -r campo1 campo2; do ...; done < arq.csv]. Para PULAR o cabeçalho sem criar subshell, agrupe: [{ read -r cabecalho; while ...; done; } < arq.csv]. Esse método NÃO entende vírgulas dentro de aspas; para CSV complexo use [csvkit], [python] ou o [FPAT] do gawk.
+#
+#   - Exemplo: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#printf "ana\nbia\ncaio\n" > nomes.txt
+#mapfile -t nomes < nomes.txt
+#echo "total: ${#nomes[@]} | primeiro: ${nomes[0]} | último: ${nomes[-1]}"
+#for n in "${nomes[@]}"; do echo "- $n"; done
+#rm nomes.txt
+#-----------------------------------------------------------
+#
+#   - CSV pulando o cabeçalho: [sh e bash]
+#-----------------------------------------------------------
+#printf "nome,usuario,grupo\nAna Silva,ana,devs\nBia Costa,bia,rh\n" > usuarios.csv
+#{ read -r cabecalho; while IFS=, read -r nome usuario grupo; do echo "criar usuário '$usuario' ($nome) no grupo $grupo"; done; } < usuarios.csv
+#rm usuarios.csv
+#-----------------------------------------------------------
+#
+# >> 25.3 JSON COM JQ
+#   O jq lê e filtra JSON (instale: [pacman -S jq]). [jq '.campo' arq.json] | [-r] sem aspas na saída | [.lista[]] percorre uma lista | [.lista | length] conta | [select(.cpu > 50)] filtra | [-c] um objeto por linha | [curl -s URL | jq -r '.chave'] lê uma API.
+#   NUNCA monte JSON à mão com aspas e variáveis: se o valor tiver aspas ou quebra de linha, quebra tudo. Crie com [jq -n --arg nome "$valor" '{nome: $nome}'], que escapa tudo sozinho.
+#
+#   - Exemplo (precisa do jq): [sh e bash]
+#-----------------------------------------------------------
+#if command -v jq > /dev/null; then
+#    printf '{"servidores":[{"nome":"web1","ativo":true,"cpu":35},{"nome":"db1","ativo":false,"cpu":80}]}' > s.json
+#    jq -r '.servidores[] | "\(.nome): ativo=\(.ativo) cpu=\(.cpu)%"' s.json
+#    jq '.servidores | length' s.json
+#    jq -r '.servidores[] | select(.cpu > 50) | .nome' s.json
+#    jq -n --arg msg 'texto com "aspas"' '{texto: $msg}'
+#    rm s.json
+#else echo "jq não instalado (sudo pacman -S jq)"; fi
+#-----------------------------------------------------------
+#
+# >> 25.4 ALERTAS POR WEBHOOK E E-MAIL
+#   Exemplos (NÃO execute com URLs reais em testes; guarde token e URL em um arquivo com [chmod 600], nunca dentro do script):
+#     Telegram: curl -fsS --max-time 10 -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" -d chat_id="$CHAT_ID" --data-urlencode text="$mensagem"
+#     Discord:  curl -fsS --max-time 10 -H "Content-Type: application/json" -d "$(jq -n --arg c "$mensagem" '{content: $c}')" "$WEBHOOK_URL"
+#     Slack:    curl -fsS --max-time 10 -H "Content-type: application/json" --data "$(jq -n --arg t "$mensagem" '{text: $t}')" "$WEBHOOK_URL"
+#     E-mail:   echo "corpo" | mail -s "assunto" destino@exemplo.com   (precisa de um servidor de e-mail configurado, como postfix ou msmtp)
+#   Boas práticas: [curl -fsS --max-time 10] (falha em erro HTTP, mostra erros e não trava), poucas tentativas ([--retry 2]), e NUNCA derrube o script de monitoramento porque o alerta falhou: [enviar_alerta "$msg" || log WARN "alerta não enviado"].
+#   Evite spam: avise só quando o estado MUDAR. Guarde o último estado em um arquivo, compare e grave.
+#
+#   - Alerta só na mudança de estado (o envio é simulado com echo): [sh e bash]
+#-----------------------------------------------------------
+#estado_arq=$(mktemp)
+#echo "OK" > "$estado_arq"
+#for atual in OK OK FALHA FALHA OK; do
+#    anterior=$(cat "$estado_arq")
+#    if [ "$atual" != "$anterior" ]; then echo "MUDOU de $anterior para $atual -> enviar alerta"; echo "$atual" > "$estado_arq"; else echo "continua $atual (sem alerta)"; fi
+#done
+#rm "$estado_arq"
+#-----------------------------------------------------------
+
+
+# ==============================================================================
+# 26. AMBIENTE DO SHELL: BASH, ZSH, PATH E ARQUIVOS DE CONFIGURAÇÃO
+# ==============================================================================
+# O shell do TERMINAL onde você digita (provavelmente o zsh, pelo [%] que apareceu no fim da linha) é diferente do shell que executa o SCRIPT (o do shebang). Veja o seu: [echo $SHELL] (shell padrão do usuário) | [ps -p $$ -o comm=] (shell atual) | [chsh -s /bin/bash] troca o padrão.
+#
+# >> 26.1 ARQUIVOS DE CONFIGURAÇÃO, PATH E ALIAS
+#   - bash: [~/.bashrc] (terminais interativos) e [~/.bash_profile] ou [~/.profile] (login). zsh: [~/.zshrc] (interativo) e [~/.zprofile] (login). As alterações valem em novos terminais ou depois de [source ~/.zshrc].
+#   - PATH: lista de pastas (separadas por [:]) onde o shell procura comandos, da ESQUERDA para a direita: a primeira que tiver o comando vence. Para chamar seus scripts de qualquer lugar: [mkdir -p ~/bin; cp script.sh ~/bin/meuscript; chmod +x ~/bin/meuscript] e, no .zshrc ou .bashrc, [export PATH="$HOME/bin:$PATH"]. Nunca coloque [.] nem uma pasta vazia no PATH (risco de segurança).
+#   - alias: apelido de comando do TERMINAL: [alias ll='ls -lah'] | [alias] lista | [unalias ll] remove. Em scripts os aliases não funcionam por padrão: use funções.
+#   - Funções no .bashrc ou .zshrc viram mini-comandos: [mkcd() { mkdir -p "$1" && cd "$1"; }]
+#   - Prompt: bash usa [PS1] (exemplo: '\u@\h:\w\$ ') e zsh usa [PROMPT] (exemplo: '%n@%m:%~ %# '). Histórico: [history] | Ctrl+R busca | [!!] repete o último comando | [!$] último argumento do comando anterior.
+#
+#   - Exemplo (instalar um script no PATH, só nesta execução): [sh e bash]
+#-----------------------------------------------------------
+#echo "shell padrão: $SHELL"
+#echo "$PATH" | tr ':' '\n' | head -n 3
+#mkdir -p bin_teste; printf '#!/bin/sh\necho "olá do meuscript"\n' > bin_teste/meuscript; chmod +x bin_teste/meuscript
+#command -v meuscript > /dev/null || echo "meuscript ainda não está no PATH"
+#PATH="$PWD/bin_teste:$PATH"; meuscript; command -v meuscript
+#rm -r bin_teste
+#-----------------------------------------------------------
+#
+# >> 26.2 DIFERENÇAS ENTRE ZSH E BASH (no terminal)
+#   - Arrays do zsh começam no ÍNDICE 1 (no bash, em 0). [${arr[-1]}] funciona nos dois.
+#   - Variável SEM aspas não é separada em palavras no zsh (no bash é). [arq="a b"; ls $arq] procura um arquivo chamado "a b" no zsh, e dois arquivos ("a" e "b") no bash.
+#   - Curinga sem resultado: [ls *.xyz] dá ERRO ("no matches found") no zsh. O bash passa o texto literal.
+#   - [read -p "texto" var] NÃO mostra o prompt no zsh (lá o [-p] é outra coisa). No zsh use [read "var?texto"]. O [read -a] do bash vira [read -A].
+#   - O zsh marca com [%] quando a última saída não terminou com quebra de linha: [unsetopt PROMPT_SP] desativa.
+#   - Regra prática: escreva scripts com [#!/bin/bash] (ou sh), que não são afetados pelo zsh, e ao digitar comandos soltos no terminal lembre das regras do zsh.
+
+
+# ==============================================================================
+# 27. TÓPICOS EXTRAS (eval, substituição de processo, variáveis do bash, qualidade)
+# ==============================================================================
+# >> 27.1 EVAL E SEUS RISCOS
+#   O [eval] executa um TEXTO como código, depois de uma segunda expansão. Se parte do texto vier de um usuário, arquivo ou rede, ele pode executar QUALQUER coisa (injeção de comando). Quase sempre há alternativa: arrays ([cmd=(ls -l); "${cmd[@]}"]), [case], [printf -v], expansão indireta [${!nome}] (bash). Se precisar do eval, valide a entrada antes.
+#
+#   - Demonstração inofensiva do problema: [sh e bash]
+#-----------------------------------------------------------
+#entrada="x; echo INJETADO"
+#echo "com eval:"; eval "echo $entrada"
+#echo "sem eval:"; echo "$entrada"
+#-----------------------------------------------------------
+#
+# >> 27.2 RECURSOS DO BASH
+#   - Substituição de processo: [<(comando)] vira um "arquivo" com a saída do comando. Ex: [diff <(sort a.txt) <(sort b.txt)]. Também evita o subshell do pipe: [while read ...; done < <(cmd)].
+#   - Expansão indireta: [nome=var; var=10; echo "${!nome}"] mostra 10.
+#   - Variáveis úteis: [$LINENO] linha atual | [${FUNCNAME[0]}] função atual | [$BASH_VERSION] | [${PIPESTATUS[@]}] código de cada comando do último pipe | [$RANDOM] | [$SECONDS] | [$HOSTNAME] | [$UID] e [$EUID] | [$PPID].
+#   - Depuração com mais informação: [PS4='+ ${BASH_SOURCE}:${LINENO}: '; set -x] mostra arquivo e linha de cada comando. [trap 'echo "erro na linha $LINENO" >&2' ERR] avisa onde um comando falhou.
+#
+#   - Exemplo: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#nome=var; var=10; echo "indireta: ${!nome}"
+#diff <(printf "b\na\n" | sort) <(printf "a\nb\n") && echo "iguais depois de ordenar"
+#false | true | false; echo "PIPESTATUS: ${PIPESTATUS[*]}"
+#f() { echo "função ${FUNCNAME[0]} chamada na linha $LINENO"; }; f
+#(trap 'echo "falhou na linha $LINENO"' ERR; false) || echo "o subshell terminou com código $?"
+#-----------------------------------------------------------
+#
+# >> 27.3 QUALIDADE E TESTES
+#   - ShellCheck: analisa o script e aponta erros e más práticas ([shellcheck script.sh]; no Arch: [pacman -S shellcheck]). Para ignorar um aviso consciente: [# shellcheck disable=SC2086] na linha de cima.
+#   - shfmt: formata o código de forma padronizada ([shfmt -w -i 4 script.sh]).
+#   - Bats: testes automatizados. Arquivo [teste.bats]: [@test "soma 2 + 3" { run ./soma.sh 2 3; [ "$status" -eq 0 ]; [ "$output" = "5" ]; }]. Rode com [bats teste.bats].
+#   - Integração contínua (GitHub Actions): rode ShellCheck e Bats a cada push, em [.github/workflows/ci.yml].
+
+
+# ==============================================================================
+# 28. GIT E GITHUB PARA OS SEUS SCRIPTS
+# ==============================================================================
+#   git init | git status | git add arq (ou [git add -p] para escolher pedaços) | git commit -m "mensagem" | git log --oneline | git diff (o que mudou e não foi adicionado) | git diff --staged | git restore arq (descarta alterações) | git switch -c nome (cria e troca de branch) | git merge nome | git remote add origin URL | git push -u origin main | git pull | git clone URL
+#   - Mensagens de commit: curtas, no imperativo, uma ideia por commit ("Adiciona verificador de conectividade", "Corrige validação de parâmetros").
+#   - [.gitignore] lista o que NÃO versionar, um padrão por linha: [config.sh], [*.log], [*.tmp], [.env], [relatorios/].
+#   - O bit de execução é versionado: se esqueceu o [chmod +x], use [git update-index --chmod=+x script.sh]. [git ls-files -s] mostra o modo (100755 = executável).
+#   - Problema clássico vindo do Windows: finais de linha CRLF fazem o script falhar com "bad interpreter: /bin/bash^M". Verifique com [file script.sh]. Corrija com [sed -i 's/\r$//' script.sh] (ou [dos2unix]) e previna com um arquivo [.gitattributes] contendo [*.sh text eol=lf].
+#   - NUNCA faça commit de senhas, tokens ou chaves SSH. Se enviou por engano, considere a credencial COMPROMETIDA: revogue e troque (apagar o commit depois não basta). Ferramentas de varredura: gitleaks, git-secrets.
+#   - Estrutura sugerida de repositório: README.md | script.sh (ou bin/) | lib/ | exemplos/ | tests/ | config.exemplo | .gitignore | .gitattributes | LICENSE. Para vários exercícios: uma pasta por exercício ou por projeto, com o índice no README da raiz.
+#
+#   - Repositório de teste que ignora o config.sh (precisa do git): [sh e bash]
+#-----------------------------------------------------------
+#if command -v git > /dev/null; then
+#    git init -q repo_teste && cd repo_teste
+#    git config user.email "teste@exemplo.com"; git config user.name "Teste"
+#    printf '#!/bin/sh\necho oi\n' > a.sh; chmod +x a.sh
+#    printf 'config.sh\n*.log\n' > .gitignore; touch config.sh x.log
+#    git add -A; git commit -q -m "Adiciona script de exemplo"
+#    echo "arquivos não versionados (vazio = tudo certo):"; git status --short
+#    git ls-files -s a.sh
+#    git log --oneline
+#    cd .. && rm -rf repo_teste
+#else echo "git não instalado"; fi
+#-----------------------------------------------------------
+#
+#   - Finais de linha CRLF quebram o shebang: [sh e bash]
+#-----------------------------------------------------------
+#printf '#!/bin/sh\r\necho oi\r\n' > crlf.sh; chmod +x crlf.sh
+#./crlf.sh 2>&1 | head -n 1
+#sed -i 's/\r$//' crlf.sh; ./crlf.sh
+#rm crlf.sh
+#-----------------------------------------------------------
+
+
+# ==============================================================================
+# 29. EXPRESSÕES REGULARES (REGEX)
+# ==============================================================================
+# Uma expressão regular é um PADRÃO que descreve o formato de um texto. O shell compara o texto com o padrão e responde "casa" (sucesso, código 0) ou "não casa" (código 1). Serve para validar entradas, buscar e trocar trechos de texto.
+#
+# ONDE USAR (cada ferramenta aceita regex de um jeito):
+#   - [grep -E 'padrão' arquivo]  -> mostra as linhas que casam. Opções úteis: -o (só o trecho que casou) | -q (não imprime, só devolve o código) | -v (linhas que NÃO casam) | -i (ignora maiúsculas) | -c (conta as linhas) | -n (mostra o número da linha).
+#   - [sed -E 's/padrão/troca/g']  -> substitui o que casou.
+#   - [awk '$1 ~ /padrão/']  -> testa uma coluna. [!~] é "não casa".
+#   - [[ $var =~ padrão ]]  -> testa uma variável (SÓ bash). Não coloque o padrão entre aspas.
+#   - Use sempre a opção -E (regex estendida) no grep e no sed. Sem ela, os símbolos + ? | { } ( ) precisam de barra invertida.
+#
+# IMPORTANTE: REGEX NÃO É GLOB. No [case], no [ls] e em [*.txt] o asterisco significa "qualquer coisa". Na regex, o asterisco significa "repete o item anterior". O equivalente de [*.txt] em regex é [.*[.]txt$].
+#
+# >> 29.1 ÂNCORAS E CLASSES (posição e "um caractere entre vários")
+#   - [^]      início do texto (da linha).
+#   - [$]      fim do texto (da linha).
+#   - [.]      qualquer caractere (um só).
+#   - [[abc]]  um caractere entre a, b ou c.
+#   - [[0-9]]  um dígito. [[a-z]] uma minúscula. [[A-Za-z]] uma letra. [[A-Za-z0-9_]] letra, dígito ou sublinhado.
+#   - [[^0-9]] um caractere que NÃO é dígito (o [^] dentro dos colchetes nega).
+#   - Sem as âncoras, o padrão pode casar em qualquer pedaço do texto. Com [^...$] ele precisa casar o texto INTEIRO.
+#
+#   - Exemplo (âncoras e classes): [sh e bash | executar: sh script.sh]
+#-----------------------------------------------------------
+#echo "tem dígito em algum lugar?"; echo "abc12x" | grep -E '[0-9]'
+#echo "só dígitos do começo ao fim?"; echo "abc12x" | grep -E '^[0-9]+$' || echo "não"
+#echo "começa com letra:"; printf "abc\n123\nx9\n" | grep -E '^[a-z]'
+#echo "termina com .sh:"; printf "a.sh\nb.txt\nc.sh\n" | grep -E '[.]sh$'
+#echo "não é dígito:"; echo "a1b2" | grep -oE '[^0-9]'
+#-----------------------------------------------------------
+#
+# >> 29.2 QUANTIFICADORES (quantas vezes o item ANTERIOR se repete)
+#   - [+]     uma ou mais vezes.
+#   - [*]     zero ou mais vezes.
+#   - [?]     zero ou uma vez (opcional).
+#   - [{3}]   exatamente 3 vezes.
+#   - [{2,4}] de 2 a 4 vezes.
+#   - [{2,}]  2 ou mais vezes.
+#   - O quantificador vale só para o item imediatamente antes dele: em [ab+] o [+] vale para o b; para repetir "ab" use o grupo [(ab)+].
+#   - A regex é "gulosa": pega o trecho mais longo possível. Em [echo "<a><b>" | grep -oE '<.+>'] sai [<a><b>] inteiro, e não só [<a>]. Para pegar só [<a>] use [<[^>]+>].
+#
+#   - Exemplo (quantificadores): [sh e bash | executar: sh script.sh]
+#-----------------------------------------------------------
+#echo "5 ou mais dígitos:"; printf "123\n12345\n1234567\n" | grep -E '^[0-9]{5,}$'
+#echo "sinal opcional:"; printf "15\n-15\n+15\n" | grep -E '^-?[0-9]+$'
+#echo "cor ou colour:"; printf "color\ncolour\ncolr\n" | grep -E '^colou?r$'
+#echo "gulosa:"; echo "<a><b>" | grep -oE '<.+>'
+#echo "não gulosa (usando [^>]):"; echo "<a><b>" | grep -oE '<[^>]+>'
+#-----------------------------------------------------------
+#
+# >> 29.3 GRUPOS, "OU" E ESCAPE
+#   - [( )]  agrupa, para aplicar um quantificador ao conjunto: [^([0-9]{1,3}[.]){3}[0-9]{1,3}$].
+#   - [|]    "ou": [^(sim|não)$] casa "sim" ou "não" (o texto inteiro).
+#   - [\.] ou [[.]]  ponto literal. Sem o escape, o ponto é "qualquer caractere": [1.5] casa "125". Dentro de colchetes os símbolos já perdem o significado especial, por isso [[.]] é a forma mais segura. Para outros símbolos, escape com barra: [\$] [\*] [\(] [\+] [\?] [\|] [\\].
+#   - Dentro de [ ]: o [-] precisa ficar no começo ou no fim ([[-+0-9]] ou [[0-9-]]) e o [^] não pode ser o primeiro.
+#
+#   - Exemplo (grupos, ou e escape): [sh e bash | executar: sh script.sh]
+#-----------------------------------------------------------
+#echo "formato de IPv4:"; printf "192.168.0.1\n10.0.0\n999.1.1.1\n" | grep -E '^([0-9]{1,3}[.]){3}[0-9]{1,3}$'
+#echo "sim ou não:"; printf "sim\nnão\ntalvez\n" | grep -E '^(sim|não)$'
+#echo "ponto sem escape casa errado:"; echo "125" | grep -E '^1.5$'
+#echo "ponto escapado não casa:"; echo "125" | grep -E '^1[.]5$' || echo "não casou, correto"
+#echo "hora HH:MM:"; printf "09:30\n23:59\n24:00\n7:5\n" | grep -E '^([01][0-9]|2[0-3]):[0-5][0-9]$'
+#-----------------------------------------------------------
+#   (Nota: o padrão do IPv4 só confere a FORMA. [999.1.1.1] passa. Para validar de verdade, separe as 4 partes e compare cada uma com 255.)
+#
+# >> 29.4 CLASSES POSIX (nomes no lugar de intervalos)
+#   - Funcionam dentro de colchetes duplos: [[[:digit:]]] é um dígito. Evitam problemas de idioma (locale) com intervalos como [a-z], que em alguns sistemas incluem maiúsculas.
+#   - [[:digit:]] dígito | [[:alpha:]] letra | [[:alnum:]] letra ou dígito | [[:upper:]] maiúscula | [[:lower:]] minúscula | [[:space:]] espaço, tab ou quebra de linha | [[:blank:]] espaço ou tab | [[:punct:]] pontuação.
+#   - Atalhos como [\d], [\w] e [\s] NÃO existem no grep -E padrão. Use [[0-9]], [[A-Za-z0-9_]] ou [[:space:]]. (O [grep -P] tem esses atalhos, mas não é padrão em todos os sistemas.)
+#
+#   - Exemplo (classes POSIX): [sh e bash | executar: sh script.sh]
+#-----------------------------------------------------------
+#printf "abc\nABC\n123\na1\n" | grep -E '^[[:lower:]]+$'
+#printf "abc\nABC\n123\na1\n" | grep -E '^[[:alnum:]]+$'
+#echo "a   b	c" | grep -oE '[[:space:]]+' | wc -l
+#-----------------------------------------------------------
+#
+# >> 29.5 NA PRÁTICA: GREP, SED, AWK E [[ =~ ]]
+#   - [grep -q] só devolve o código, então serve direto no if: [if echo "$x" | grep -Eq '^[0-9]+$'; then ...; fi]. Funciona em sh e bash, mas cria processos. Para texto que está em variável, em sh prefira o [case].
+#   - [sed -E 's/(parte1)(parte2)/\2 \1/'] os parênteses "capturam" partes que podem ser reusadas na troca como [\1], [\2]... Em [sed -E] o [&] representa o trecho inteiro que casou.
+#   - [awk '$2 ~ /^[0-9]+$/'] mostra só as linhas em que a coluna 2 é número. [awk '$2 !~ /^[0-9]+$/ {print "linha " NR " inválida"}'] aponta as erradas.
+#   - [[ $x =~ padrão ]] (SÓ bash): se casar, o array [BASH_REMATCH] guarda o resultado: [${BASH_REMATCH[0]}] é o trecho inteiro e [${BASH_REMATCH[1]}], [${BASH_REMATCH[2]}]... são os grupos de parênteses.
+#   - Guarde padrões longos em variável e use SEM aspas: [re='^[0-9]+$'; [[ $n =~ $re ]]]. Entre aspas o padrão vira texto literal.
+#   - [case] também testa formato, mas com GLOB e não regex: [case "$n" in ''|*[!0-9]*) echo "não é número";; esac] funciona em qualquer sh.
+#
+#   - Exemplo (grep, sed e awk): [sh e bash | executar: sh script.sh]
+#-----------------------------------------------------------
+#n="2026"
+#if echo "$n" | grep -Eq '^[0-9]+$'; then echo "$n é número"; else echo "$n não é número"; fi
+#echo "troca a ordem de dia/mês/ano:"; echo "18/11/2026" | sed -E 's/([0-9]{2})\/([0-9]{2})\/([0-9]{4})/\3-\2-\1/'
+#echo "remove espaços do começo e do fim:"; echo "   texto   " | sed -E 's/^[[:space:]]+|[[:space:]]+$//g' | cat -A
+#echo "coluna 2 é número?"; printf "a 10\nb x\nc 30\n" | awk '$2 ~ /^[0-9]+$/ {print $1 " ok"} $2 !~ /^[0-9]+$/ {print $1 " inválido"}'
+#echo "case (glob):"; for x in 12 1a ""; do case "$x" in ''|*[!0-9]*) echo "'$x' não é número";; *) echo "'$x' é número";; esac; done
+#-----------------------------------------------------------
+#
+#   - Exemplo (regex dentro do bash, com grupos): [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#re='^([0-9]{2}):([0-9]{2})$'
+#h="14:35"
+#if [[ $h =~ $re ]]; then
+#    echo "tudo: ${BASH_REMATCH[0]} | hora: ${BASH_REMATCH[1]} | minuto: ${BASH_REMATCH[2]}"
+#else
+#    echo "formato inválido"
+#fi
+#[[ "abc" =~ ^[0-9]+$ ]] || echo "abc não é número"
+#-----------------------------------------------------------
+#
+# >> 29.6 RECEITAS PRONTAS (copie e adapte; todas com [grep -E] ou [[ =~ ]])
+#   - Inteiro:                  [^[0-9]+$]
+#   - Inteiro com sinal:        [^[+-]?[0-9]+$]
+#   - Decimal com ponto:        [^[0-9]+([.][0-9]+)?$]
+#   - Decimal com ponto ou vírgula: [^[0-9]+([.,][0-9]+)?$]
+#   - Só letras (sem acento):   [^[A-Za-z]+$]
+#   - Nome de usuário Linux:    [^[a-z_][a-z0-9_-]{0,31}$]
+#   - Hora HH:MM:               [^([01][0-9]|2[0-3]):[0-5][0-9]$]
+#   - Data DD/MM/AAAA (forma):  [^[0-9]{2}/[0-9]{2}/[0-9]{4}$]
+#   - CEP:                      [^[0-9]{5}-?[0-9]{3}$]
+#   - IPv4 (forma):             [^([0-9]{1,3}[.]){3}[0-9]{1,3}$]
+#   - Endereço MAC:             [^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$]
+#   - E-mail (simples):         [^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}$]
+#   - Linha de comentário:      [^[[:space:]]*#]
+#   - Linha vazia ou só espaços: [^[[:space:]]*$]
+#   - Extensão do arquivo:      [[.]sh$]
+#
+#   - Teste das receitas: [SÓ bash | executar: bash script.sh]
+#-----------------------------------------------------------
+#testa() { if [[ $2 =~ $1 ]]; then echo "casa    : '$2'"; else echo "NÃO casa: '$2'"; fi; }
+#testa '^[+-]?[0-9]+$' "-42"
+#testa '^[+-]?[0-9]+$' "4.2"
+#testa '^[0-9]+([.,][0-9]+)?$' "10,50"
+#testa '^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$' "aa:bb:cc:00:11:22"
+#testa '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+[.][A-Za-z]{2,}$' "ana@exemplo.com"
+#testa '^[0-9]{5}-?[0-9]{3}$' "60000-000"
+#testa '^[[:space:]]*#' "   # comentário"
+#-----------------------------------------------------------
+#
+# >> 29.7 ERROS COMUNS
+#   - Esquecer o [-E] no grep e no sed: [+], [?], [|], [{}] e [()] viram texto comum e o padrão "não funciona".
+#   - Esquecer as âncoras na validação: [[0-9]+] aceita "abc12x"; use [^[0-9]+$].
+#   - Padrão entre aspas no [[ =~ ]]: vira comparação literal. Use variável sem aspas.
+#   - Ponto sem escape: [.] casa qualquer caractere. Para o ponto de verdade use [[.]] ou [\.].
+#   - Aspas duplas no padrão do grep: o shell expande [$] e crases antes do grep ver. Use aspas SIMPLES no padrão: [grep -E '^[0-9]+$'].
+#   - Misturar glob com regex: [*.txt] (glob) não é [.*[.]txt$] (regex).
+#   - Usar regex para tudo: para validar IP, data ou e-mail de verdade a regex só confere a forma; confira os valores com aritmética ou com ferramentas próprias.
+#   - Dica de depuração: use [grep -o] para ver exatamente o trecho que casou, e [grep -v] para ver o que ficou de fora.

@@ -11,10 +11,10 @@ fi
 
 #pedindo valores
 echo "pressione ENTER para rodar a versão que solicita dados"
-read dummy #apenas para pausa o programa
+read -r dummy #apenas para pausa o programa
 
 echo "Digite 3 valores e a seguir o script vai mostrar qual o maior entre eles!"
-read -p "1° Valor: " valor1; read -p "2° Valor: " valor2; read -p "3° Valor: " valor3
+read -r -p "1° Valor: " valor1; read -r -p "2° Valor: " valor2; read -r -p "3° Valor: " valor3
 
 if [ $((valor1 > valor2)) ] && [ $((valor1 > valor3)) ]; then
     echo "$valor1 é o maior!"
